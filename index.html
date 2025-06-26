@@ -888,6 +888,10 @@
         </div>
       </div>
     </div>
+    <!-- Kartı Sil butonu -->
+    <div style="width:100%; display:flex; justify-content:center; margin-top:10px;">
+      <button id="deleteCardBtn" style="padding:12px 32px; font-size:1.1rem; border-radius:8px; border:1px solid #d32f2f; background:#fff; color:#d32f2f; cursor:pointer; font-weight:700; min-width:120px; text-align:center; transition:background 0.2s;">🗑️ Kartı Sil</button>
+    </div>
 
     <!-- 1. db.json seç/ekle butonu (sadece ilk açılışta) -->
     <div id="dbJsonSelectorContainer" style="display:none; width:100%; text-align:center; margin-top:40px;">
@@ -1631,6 +1635,22 @@ installBtn.addEventListener('click', async () => {
     }
     deferredPrompt = null;
   }
+});
+
+const deleteCardBtn = document.getElementById('deleteCardBtn');
+deleteCardBtn.addEventListener('click', async function() {
+  if (!flashcardsData.length) return;
+  const confirmDelete = confirm('Bu kartı silmek istediğinizden emin misiniz?');
+  if (!confirmDelete) return;
+  // Kartı sil
+  dbData[currentSheetName].splice(currentCardIndex, 1);
+  await saveDbJson();
+  // Eğer son kart silindiyse bir önceki karta git, yoksa aynı indexte kal
+  if (currentCardIndex >= dbData[currentSheetName].length) {
+    currentCardIndex = dbData[currentSheetName].length - 1;
+  }
+  renderSheetNamesAndMenu(currentSheetName);
+  renderFlashcardsFromDb();
 });
   </script>
 </body>
