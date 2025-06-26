@@ -1679,6 +1679,16 @@
       "iki": "b",
       "iki_iki": "b",
       "iki_uc": "b"
+    },
+    {
+      "bir": "+",
+      "bir_iki": "+",
+      "bir_uc_artikel": "+",
+      "bir_uc": "+",
+      "bir_dort": "+",
+      "iki": "+",
+      "iki_iki": "+",
+      "iki_uc": "+"
     }
   ],
   "LF7": [
