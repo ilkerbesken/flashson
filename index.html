@@ -851,7 +851,7 @@
         </div>
         <button1 id="exportPdf">PDF Dışa Aktar &#10240 &#x1F5B6</button1>
         <button1 id="goToSheetBtn">Ekle &#10240 &#43;</button1>
-        <button id="installPwaBtn">Masaüstüne Ekle</button>
+        <button1 id="installPwaBtn" style="display:none;">Masaüstüne Ekle</button1>
       </div>
     </div>
 
@@ -1609,15 +1609,13 @@ if ('serviceWorker' in navigator) {
   });
 }
 
+const installBtn = document.getElementById('installPwaBtn');
 let deferredPrompt = null;
 window.addEventListener('beforeinstallprompt', (e) => {
   e.preventDefault();
   deferredPrompt = e;
-  const installBtn = document.getElementById('installPwaBtn');
   installBtn.style.display = 'block';
 });
-
-const installBtn = document.getElementById('installPwaBtn');
 installBtn.addEventListener('click', async () => {
   if (deferredPrompt) {
     deferredPrompt.prompt();
