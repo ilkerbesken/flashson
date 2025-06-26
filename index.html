@@ -891,14 +891,16 @@
 
     <!-- 1. db.json seç/ekle butonu (sadece ilk açılışta) -->
     <div id="dbJsonSelectorContainer" style="display:none; width:100%; text-align:center; margin-top:40px;">
-      <button id="selectDbJsonBtn" style="padding:12px 24px; font-size:1.1rem; border-radius:8px; border:1px solid #ccc; background:#fff; cursor:pointer;">db.json seç / ekle</button>
+      <div style="display:flex; justify-content:center; align-items:center; width:100%;">
+        <button id="selectDbJsonBtn" style="padding:16px 32px; font-size:1.2rem; border-radius:10px; border:1px solid #ccc; background:#fff; cursor:pointer; font-weight:600; width:100%; max-width:320px; text-align:center; display:flex; justify-content:center; align-items:center;">db.json seç / ekle</button>
+      </div>
       <div id="dbJsonSelectorInfo" style="margin-top:10px; color:#888; font-size:0.9rem;"></div>
     </div>
 
     <!-- 2. Yeni kayıt ekleme modalı -->
     <div id="addCardModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.4); z-index:2000; align-items:center; justify-content:center;">
       <div style="background:#fff; padding:24px; border-radius:12px; min-width:320px; max-width:90vw; box-shadow:0 4px 24px rgba(0,0,0,0.2);">
-        <h3>Yeni Kart Ekle</h3>
+        <h3 style="text-align:center;">Yeni Kart Ekle</h3>
         <form id="addCardForm">
           <div style="margin-bottom:8px;"><input name="bir" placeholder="bir (örn: substantiv)" required style="width:100%;padding:6px;"></div>
           <div style="margin-bottom:8px;"><input name="bir_iki" placeholder="bir_iki (örn: #LF 1)" required style="width:100%;padding:6px;"></div>
@@ -908,9 +910,9 @@
           <div style="margin-bottom:8px;"><input name="iki" placeholder="iki (örn: isim)" required style="width:100%;padding:6px;"></div>
           <div style="margin-bottom:8px;"><input name="iki_iki" placeholder="iki_iki (örn: biçimlendirme)" style="width:100%;padding:6px;"></div>
           <div style="margin-bottom:8px;"><input name="iki_uc" placeholder="iki_uc (örn: Malzeme akışının tasarımı.)" style="width:100%;padding:6px;"></div>
-          <div style="text-align:right; margin-top:12px;">
-            <button type="button" id="cancelAddCardBtn" style="margin-right:10px;">İptal</button>
-            <button type="submit">Ekle</button>
+          <div style="display:flex; justify-content:center; align-items:center; gap:16px; margin-top:16px;">
+            <button type="button" id="cancelAddCardBtn" style="padding:12px 32px; font-size:1.1rem; border-radius:8px; border:1px solid #ccc; background:#eee; cursor:pointer; font-weight:600; min-width:100px; text-align:center;">İptal</button>
+            <button type="submit" style="padding:12px 32px; font-size:1.1rem; border-radius:8px; border:1px solid #222; background:#222; color:#fff; cursor:pointer; font-weight:700; min-width:100px; text-align:center;">Ekle</button>
           </div>
         </form>
       </div>
