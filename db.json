@@ -1559,6 +1559,126 @@
       "iki": "r",
       "iki_iki": "r",
       "iki_uc": "r"
+    },
+    {
+      "bir": "u",
+      "bir_iki": "u",
+      "bir_uc_artikel": "u",
+      "bir_uc": "u",
+      "bir_dort": "u",
+      "iki": "u",
+      "iki_iki": "u",
+      "iki_uc": "u"
+    },
+    {
+      "bir": "o",
+      "bir_iki": "o",
+      "bir_uc_artikel": "o",
+      "bir_uc": "o",
+      "bir_dort": "o",
+      "iki": "o",
+      "iki_iki": "o",
+      "iki_uc": "o"
+    },
+    {
+      "bir": "p",
+      "bir_iki": "p",
+      "bir_uc_artikel": "p",
+      "bir_uc": "p",
+      "bir_dort": "p",
+      "iki": "p",
+      "iki_iki": "p",
+      "iki_uc": "p"
+    },
+    {
+      "bir": "t",
+      "bir_iki": "t",
+      "bir_uc_artikel": "t",
+      "bir_uc": "t",
+      "bir_dort": "t",
+      "iki": "t",
+      "iki_iki": "t",
+      "iki_uc": "t"
+    },
+    {
+      "bir": "z",
+      "bir_iki": "z",
+      "bir_uc_artikel": "z",
+      "bir_uc": "z",
+      "bir_dort": "z",
+      "iki": "z",
+      "iki_iki": "z",
+      "iki_uc": "z"
+    },
+    {
+      "bir": "s",
+      "bir_iki": "s",
+      "bir_uc_artikel": "s",
+      "bir_uc": "s",
+      "bir_dort": "s",
+      "iki": "s",
+      "iki_iki": "s",
+      "iki_uc": "s"
+    },
+    {
+      "bir": "q",
+      "bir_iki": "q",
+      "bir_uc_artikel": "q",
+      "bir_uc": "q",
+      "bir_dort": "q",
+      "iki": "q",
+      "iki_iki": "q",
+      "iki_uc": "q"
+    },
+    {
+      "bir": "ß",
+      "bir_iki": "ß",
+      "bir_uc_artikel": "ß",
+      "bir_uc": "ß",
+      "bir_dort": "ß",
+      "iki": "ß",
+      "iki_iki": "ß",
+      "iki_uc": "ß"
+    },
+    {
+      "bir": "i",
+      "bir_iki": "i",
+      "bir_uc_artikel": "i",
+      "bir_uc": "i",
+      "bir_dort": "i",
+      "iki": "i",
+      "iki_iki": "i",
+      "iki_uc": "i"
+    },
+    {
+      "bir": "q",
+      "bir_iki": "q",
+      "bir_uc_artikel": "q",
+      "bir_uc": "q",
+      "bir_dort": "q",
+      "iki": "qq",
+      "iki_iki": "q",
+      "iki_uc": "q"
+    },
+    {
+      "bir": "q",
+      "bir_iki": "q",
+      "bir_uc_artikel": "q",
+      "bir_uc": "q",
+      "bir_dort": "q",
+      "iki": "qq",
+      "iki_iki": "q",
+      "iki_uc": "q"
+    },
+    {
+      "bir": "b",
+      "bir_iki": "b",
+      "bir_uc_artikel": "b",
+      "bir_uc": "b",
+      "bir_dort": "b",
+      "iki": "b",
+      "iki_iki": "b",
+      "iki_uc": "b"
     }
   ],
   "LF7": [

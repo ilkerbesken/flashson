@@ -1343,17 +1343,51 @@ function hideDbJsonSelector() {
 // Son kullanılan dosya adını localStorage'da saklamak için anahtar
 const LAST_DB_FILE_KEY = 'lastDbJsonFileName';
 
-// Uygulama başlatıcı
+// Hoşgeldiniz modalı ekle
+const welcomeModal = document.createElement('div');
+welcomeModal.id = 'welcomeModal';
+welcomeModal.style = `
+  display: none;
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  background: rgba(0,0,0,0.65);
+  z-index: 4000;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+`;
+welcomeModal.innerHTML = `
+  <div style="background: #fff; padding: 44px 32px 36px 32px; border-radius: 22px; min-width: 320px; max-width: 90vw; box-shadow: 0 8px 32px rgba(0,0,0,0.25); display: flex; flex-direction: column; align-items: center;">
+    <h2 style="font-size: 2rem; color: #222; margin-bottom: 18px; text-align:center;">Hoşgeldiniz!</h2>
+    <div style="font-size: 1.1rem; color: #666; margin-bottom: 28px; text-align:center;">Başlamak için bir db.json dosyası seçin veya oluşturun.</div>
+    <button id="welcomeSelectDbJsonBtn" style="font-size: 1.25rem; padding: 18px 40px; border-radius: 12px; border: none; background: #222; color: #fff; cursor: pointer; font-weight: 700; margin-bottom: 8px; width: 100%; max-width: 320px;">db.json seç / ekle</button>
+  </div>
+`;
+document.body.appendChild(welcomeModal);
+const welcomeSelectDbJsonBtn = document.getElementById('welcomeSelectDbJsonBtn');
+
+// Uygulama başlatıcıda, supportsFS yoksa veya db.json seçilmemişse welcome modalı göster
 async function startApp() {
   if (!supportsFS) {
-    showDbJsonSelector('Tarayıcınızda yerel dosya erişimi desteklenmiyor.');
+    alert('Tarayıcınızda yerel dosya erişimi desteklenmiyor.');
     return;
   }
-  showDbJsonSelector();
-  // Eğer son db.json varsa modalı göster
+  // Eğer dbFileHandle zaten varsa, hiçbir modal açma
+  if (dbFileHandle) {
+    initializeAppForDb();
+    return;
+  }
+  // Eğer daha önce dosya seçilmişse, sadece lastDbModal göster
   if (localStorage.getItem(LAST_DB_FILE_KEY)) {
     showLastDbModal();
+    return;
   }
+  // Hiç dosya seçilmemişse welcome modalı göster
+  welcomeModal.style.display = 'flex';
+  welcomeSelectDbJsonBtn.onclick = async function() {
+    await selectOrCreateDbJson();
+    welcomeModal.style.display = 'none';
+  };
 }
 
 selectDbJsonBtn.addEventListener('click', selectOrCreateDbJson);
@@ -1470,6 +1504,8 @@ addCardForm.addEventListener('submit', async function(e) {
   // Yeni eklenen kartı hemen göstermek için currentCardIndex'i son karta ayarla
   currentCardIndex = dbData[currentSheetName].length - 1;
   renderFlashcardsFromDb();
+  // Welcome modalı asla görünmesin
+  if (typeof welcomeModal !== 'undefined') welcomeModal.style.display = 'none';
 });
 
 // Uygulama başlat
@@ -1524,6 +1560,7 @@ lastDbModalReselectBtn.onclick = async function() {
 };
 
 async function selectOrCreateDbJson() {
+  if (dbFileHandle) return; // Zaten seçiliyse tekrar seçtirme
   try {
     let fileHandle;
     if (supportsFS) {
@@ -1537,13 +1574,12 @@ async function selectOrCreateDbJson() {
       return;
     }
     dbFileHandle = fileHandle;
-    // Dosya adını kaydet
     localStorage.setItem(LAST_DB_FILE_KEY, dbFileHandle.name || dbFileName);
     await loadDbJson();
-    hideDbJsonSelector();
+    if (typeof welcomeModal !== 'undefined') welcomeModal.style.display = 'none';
     initializeAppForDb();
   } catch (e) {
-    showDbJsonSelector('Dosya seçilmedi.');
+    alert('Dosya seçilmedi.');
   }
 }
 
