@@ -1,0 +1,1577 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flashcards</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#FFD93D">
+
+  <!-- External Libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <style>
+    /* Font Import */
+    @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,100..900&display=swap');
+
+    /* ===== ROOT VARIABLES ===== */
+    :root {
+      --card-width: min(300pt, 90vw);
+      --card-height: min(200pt, 60vw);
+      --background-color: #f6f6f6;
+      --text-color: #333;
+      --menu-bg-color: #444;
+      --menu-item-hover: #666;
+    }
+
+    /* ===== RESET & BASE STYLES ===== */
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: "Fraunces", serif;
+      background-color: var(--background-color);
+      color: var(--text-color);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+    }
+
+    /* ===== HAMBURGER MENU STYLES ===== */
+    .menu-container {
+      position: relative;
+      margin-bottom: -80px;
+      z-index: 1001;
+    }
+
+    .hamburger-icon {
+      width: 30px;
+      height: 25px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      padding: 5px;
+      background-color: transparent;
+      border-radius: 5px;
+      transition: background-color 0.3s ease;
+      margin-left: calc(var(--card-width) + 50px);
+      position: relative;
+      animation: rotate 16s linear infinite;
+    }
+
+    @keyframes rotate {
+      from {
+        transform: rotate(0deg);
+      }
+
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .hamburger-icon span {
+      display: block;
+      width: 100%;
+      height: 6px;
+      border-radius: 2px;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+      position: absolute;
+      transform-origin: center;
+    }
+
+    .hamburger-icon span:nth-child(1) {
+      background-color: #FFD93D;
+      /* Yellow */
+      transform: rotate(30deg);
+    }
+
+    .hamburger-icon span:nth-child(2) {
+      background-color: #4D96FF;
+      /* Blue */
+      transform: rotate(90deg);
+    }
+
+    .hamburger-icon span:nth-child(3) {
+      background-color: #FF6B6B;
+      /* Red */
+      transform: rotate(150deg);
+    }
+
+    /* X animation when menu is active */
+    .hamburger-icon.active {
+      animation: none;
+    }
+
+
+
+    .hamburger-icon.active span:nth-child(1) {
+      transform: translateY(0) rotate(45deg);
+      background: linear-gradient(to right,
+          #FF6B6B 0%, #FF6B6B 50%,
+          #FF6B6B 50%, #FF6B6B 100%);
+    }
+
+    .hamburger-icon.active span:nth-child(2) {
+      opacity: 0;
+      transform: translateX(-20px);
+
+    }
+
+    .hamburger-icon.active span:nth-child(3) {
+      transform: translateY(0) rotate(-45deg);
+    }
+
+    .menu-content {
+      display: block;
+      position: absolute;
+      top: 12px;
+      right: 40px;
+      background-color: white;
+      box-shadow: rgba(0, 0, 0, 0.56) 0px 22px 70px 4px;
+      border: 1px solid black;
+      border-radius: 10px;
+      width: 300pt;
+      height: 200pt;
+      padding: 10px 0;
+      transform: translateX(100%) scale(0.95);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      opacity: 0;
+      visibility: hidden;
+      will-change: transform, opacity;
+      backface-visibility: hidden;
+    }
+
+    .menu-content.show {
+      transform: translateX(0) scale(1);
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .menu-content button1 {
+      display: block;
+      width: calc(100% - 20px);
+      margin: 8px 10px;
+      padding: 12px 20px;
+      background-color: #ffffff;
+      color: #333333;
+      border: 1px solid #e0e0e0;
+      text-align: left;
+      font-size: 1rem;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      height: 50px;
+      font-weight: 500;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .menu-content button1:hover {
+      background-color: #f6f6f6;
+      color: #333333;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      border-color: #d0d0d0;
+    }
+
+    .menu-content button1:active {
+      transform: translateY(0);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+
+    .menu-content button1::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+      transform: translateX(-100%);
+      transition: transform 0.6s ease;
+    }
+
+    .menu-content button1:hover::before {
+      transform: translateX(100%);
+    }
+
+    /* ===== FLASHCARD STYLES ===== */
+    #flashcards {
+      position: relative;
+      width: var(--card-width);
+      height: var(--card-height);
+      margin-top: 15px;
+    }
+
+    .flashcard {
+      display: none;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+      position: absolute;
+      perspective: 1000px;
+    }
+
+    .flashcard.active {
+      display: block;
+    }
+
+    .card-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transition: transform 0.6s;
+      transform-style: preserve-3d;
+    }
+
+    .card-front,
+    .card-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
+      border-radius: 3.5mm;
+      background-color: white;
+      color: black;
+      padding: 0;
+      box-shadow: rgba(14, 63, 126, 0.06) 0px 0px 0px 1px,
+        rgba(42, 51, 70, 0.03) 0px 1px 1px -0.5px,
+        rgba(42, 51, 70, 0.04) 0px 2px 2px -1px,
+        rgba(42, 51, 70, 0.04) 0px 3px 3px -1.5px,
+        rgba(42, 51, 70, 0.03) 0px 5px 5px -2.5px,
+        rgba(42, 51, 70, 0.03) 0px 10px 10px -5px,
+        rgba(42, 51, 70, 0.03) 0px 24px 24px -8px;
+    }
+
+    .card-back {
+      transform: rotateY(180deg);
+    }
+
+
+
+    /* ===== CARD CONTENT STYLES ===== */
+    /* Front Card Elements */
+    .bir {
+      position: absolute;
+      top: 0.8cm;
+      right: 0;
+      font-size: 8pt;
+      color: white;
+      background-color: black;
+      padding: 2px 25px 2px 5px;
+    }
+
+    .bir_iki {
+      margin-top: calc(0.8cm + 14pt);
+      padding-right: 25px;
+      text-align: right;
+      font-size: 8pt;
+      color: black;
+    }
+
+    .bir_uc_container {
+      display: flex;
+      align-items: baseline;
+      text-align: left;
+      height: 2cm;
+      width: 100%;
+      /* Genişliği kapsayıcıya göre ayarla */
+      padding-bottom: 0.4cm;
+      /* Kaldırılanlar: position, bottom, margin-left, margin-top */
+    }
+
+    .bir_uc_artikel {
+      font-size: 8pt;
+      color: black;
+      margin-right: 0.2em;
+      flex-shrink: 0;
+    }
+
+    .bir_uc {
+      text-align: left;
+      font-size: 28pt;
+      color: black;
+      line-height: 0.9;
+      flex: 1;
+      min-width: 0;
+      padding-bottom: 0.2cm;
+      overflow: hidden;
+      /* Hide content that exceeds the container's height */
+
+      /* Allow wrapping and hyphenation for long words */
+      overflow-wrap: break-word;
+      word-wrap: break-word;
+      /* Fallback for older browsers */
+      -webkit-hyphens: auto;
+      -moz-hyphens: auto;
+      -ms-hyphens: auto;
+      hyphens: auto;
+    }
+
+    .bir_dort {
+      text-align: left;
+      font-size: 8pt;
+      color: black;
+      line-height: 1.2;
+      width: 100%;
+      /* Genişliği kapsayıcıya göre ayarla */
+      /* Kaldırılanlar: position, bottom, margin-left, margin-bottom */
+    }
+
+    /* Back Card Elements */
+    .iki {
+      position: absolute;
+      top: 0.8cm;
+      left: 0;
+      font-size: 8pt;
+      color: white;
+      background-color: black;
+      padding: 2px 5px 2px 25px;
+    }
+
+    .content-back {
+      padding-top: calc(0.4cm + 14pt + 1cm);
+      padding-left: 1cm;
+      position: relative;
+      height: 100%;
+    }
+
+    .iki_iki {
+      text-align: left;
+      font-size: 16pt;
+      color: black;
+      line-height: 1.1;
+      position: absolute;
+      bottom: 2.4cm;
+      height: 3.2cm;
+      width: calc(100% - 2cm);
+      padding-bottom: 0.4cm;
+      overflow: hidden;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+    }
+
+    .iki_uc {
+      position: absolute;
+      bottom: 0.8cm;
+      text-align: left;
+      font-size: 8pt;
+      color: black;
+      line-height: 1.2;
+      width: calc(100% - 2cm);
+    }
+
+    /* ===== CONTROL PANEL STYLES ===== */
+    .sheet-selector-container {
+      margin: auto;
+      left: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      max-width: var(--card-width);
+      width: 100%;
+      color: black;
+    }
+
+    #sheetSelector {
+      margin: 5px 10px;
+      padding: 8px;
+      border-radius: 5px;
+      width: 160px;
+      font-family: 'Fraunces', serif;
+      font-size: 0.6rem;
+      border: 1px solid #ccc;
+      flex-grow: 1;
+    }
+
+    .controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: var(--card-width);
+      margin-bottom: 15px;
+    }
+
+    .counter {
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    /* Toggle Switch Styles */
+    .toggle-switch-container {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .toggle-switch {
+      position: relative;
+      display: inline-block;
+      width: 50px;
+      height: 24px;
+    }
+
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: .4s;
+      border-radius: 24px;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 16px;
+      width: 16px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+    }
+
+    input:checked+.slider {
+      background-color: black;
+    }
+
+    input:checked+.slider:before {
+      transform: translateX(26px);
+    }
+
+    /* Navigation Buttons */
+    .navigation {
+      margin: 30px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: var(--card-width);
+      position: relative;
+
+    }
+
+    .nav-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      position: relative;
+      padding: 2px;
+      border-radius: 8px;
+
+    }
+
+    .nav-counter {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 0.8rem;
+      font-weight: 300;
+      z-index: 1;
+    }
+
+    #prevBtn {
+      text-align: left;
+      margin-left: 8px;
+    }
+
+    #nextBtn {
+      text-align: right;
+      margin-right: 8px;
+    }
+
+    button {
+      height: 32px;
+      width: 140px;
+      border: none;
+      color: black;
+      background: transparent;
+      cursor: pointer;
+      font-family: "Fraunces", serif;
+      font-size: 1.5rem;
+      font-weight: 800;
+      text-align: justify;
+    }
+
+    button1 {
+      height: 32px;
+      width: 60px;
+      border-radius: 6px;
+      border: none;
+      background-color: white;
+      box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
+      color: black;
+      cursor: pointer;
+      font-family: "Fraunces", serif;
+      font-size: 1.5rem;
+      transition: background-color 0.2s, transform 0.1s;
+      margin: auto;
+      text-align: center;
+    }
+
+
+
+    button:hover {
+      color: grey;
+    }
+
+    @keyframes slideColors {
+      0% {
+        background-position: 100% 0;
+      }
+
+      100% {
+        background-position: 0% 0;
+        background-color: black;
+      }
+    }
+
+    button1:active {
+      transform: translateY(2px);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    }
+
+    button:disabled,
+    button1:disabled {
+      background-color: transparent;
+      cursor: not-allowed;
+    }
+
+    /* ===== PRINT STYLES ===== */
+    #print-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      font-size: 2em;
+      z-index: 1000;
+      text-align: center;
+      justify-content: flex-start;
+    }
+
+    #print-area {
+      display: none;
+    }
+
+    .mirror-x {
+      transform: scaleX(-1);
+    }
+
+    @media print {
+      @page {
+        margin: 0;
+        size: 297mm 210mm landscape;
+        /* A4 landscape dimensions */
+      }
+
+      body {
+        margin: 0;
+        padding: 0;
+      }
+
+      body>*:not(#print-area) {
+        display: none !important;
+      }
+
+      #print-area {
+        display: block !important;
+        margin: 0;
+        padding: 0;
+      }
+
+      .print-image {
+        width: 297mm;
+        height: 210mm;
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        page-break-after: always;
+        object-fit: contain;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      .print-image:first-child {
+        margin: 0;
+        padding: 0;
+      }
+
+      .print-image:last-child {
+        page-break-after: avoid;
+      }
+
+      /* Yeni eklenen kurallar */
+      .print-image:nth-child(odd) {
+        page-break-after: avoid;
+      }
+
+      .print-image:nth-child(even) {
+        page-break-after: avoid;
+      }
+    }
+
+    /* ===== RESPONSIVE STYLES ===== */
+    @media screen and (max-width: 768px) {
+      .hamburger-icon {
+        margin-left: 0;
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 1002;
+      }
+
+      .menu-content {
+        position: fixed;
+        top: 0;
+        right: 0;
+        width: 100%;
+        height: 100vh;
+        border-radius: 0;
+        z-index: 1001;
+        transform: translateX(100%) scale(0.95);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        will-change: transform, opacity;
+        backface-visibility: hidden;
+      }
+
+      .menu-content.show {
+        transform: translateX(0) scale(1);
+        opacity: 1;
+      }
+
+      .menu-content button {
+        font-size: 1.2rem;
+        padding: 15px;
+      }
+
+      .sheet-selector-container {
+        padding: 20px;
+      }
+
+      #sheetSelector {
+        width: 100%;
+        font-size: 1rem;
+      }
+
+      .controls {
+        width: var(--card-width);
+        flex-direction: column;
+        gap: 10px;
+        margin: 20px 0;
+      }
+
+      .navigation {
+        width: var(--card-width);
+        justify-content: space-between;
+      }
+
+      .navigation button {
+        width: 80px;
+        height: 40px;
+        font-size: 1.2rem;
+      }
+
+      .counter {
+        font-size: 1.2rem;
+      }
+
+      .toggle-switch {
+        width: 60px;
+        height: 30px;
+      }
+
+      .slider:before {
+        height: 22px;
+        width: 22px;
+        left: 4px;
+        bottom: 4px;
+      }
+
+      input:checked+.slider:before {
+        transform: translateX(30px);
+      }
+    }
+
+    @media screen and (max-width: 480px) {
+      :root {
+        --card-width: 95vw;
+        --card-height: 63vw;
+      }
+
+      body {
+        padding: 10px;
+      }
+
+      .bir_uc {
+        font-size: 24pt;
+      }
+
+      .iki_iki {
+        font-size: 14pt;
+      }
+
+      .bir,
+      .iki,
+      .bir_iki,
+      .bir_uc_artikel,
+      .bir_dort,
+      .iki_uc {
+        font-size: 7pt;
+      }
+    }
+
+    /* ===== SEARCH BAR STYLES ===== */
+    .search-container {
+      flex: 1;
+      margin-right: 20px;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 4px;
+      font-family: 'Fraunces', serif;
+      font-size: 0.9rem;
+      transition: border-color 0.3s ease, background-color 0.3s ease;
+      background-color: transparent;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border: 1px solid #666;
+      background-color: white;
+    }
+
+    .search-input::placeholder {
+      color: #999;
+    }
+
+    @media screen and (max-width: 768px) {
+      .controls {
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      .search-container {
+        width: 100%;
+        margin-right: 0;
+      }
+    }
+
+    .cekim {
+      padding-right: 5px;
+      text-align: right;
+      font-size: 8pt;
+      font-weight: bold;
+      font-style: italic;
+    }
+
+    .parantez {
+      font-size: 8pt;
+      font-style: italic;
+    }
+
+    .kucuk {
+      font-size: 8pt;
+    }
+
+
+    .bottom-content-area {
+      position: absolute;
+      bottom: 0.8cm;
+      left: 1cm;
+      width: calc(100% - 2cm);
+      display: flex;
+      flex-direction: column;
+      /* Çocukları dikey olarak sırala */
+      align-items: flex-start;
+      /* Çocukları sola hizala */
+      gap: 10px;
+      /* Çocuklar arasına 10px boşluk ekle */
+    }
+  </style>
+</head>
+
+<body>
+  <div id="print-overlay" style="display:none;"></div>
+  <div id="print-area"></div>
+
+  <main>
+    <div class="menu-container">
+      <div class="hamburger-icon" id="hamburgerIcon" title="tıkla / klicken">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+      <div class="menu-content" id="menuContent">
+        <div class="sheet-selector-container">
+          <label for="sheetSelector" style="font-size: 0.8rem;">   &#10240;   &#10240;Sayfa Seçin:</label>
+          <select id="sheetSelector"></select>
+        </div>
+        <button1 id="exportPdf">PDF Dışa Aktar &#10240 &#x1F5B6</button1>
+        <button1 id="goToSheetBtn">Ekle &#10240 &#43;</button1>
+      </div>
+    </div>
+
+
+
+    <div class="controls">
+      <div class="search-container">
+        <input type="text" id="searchInput" placeholder="Ara..." class="search-input">
+      </div>
+      <div class="toggle-switch-container">
+        <span id="toggleLabelDe" style="font-size: 0.8rem;">de</span>
+        <label class="toggle-switch">
+                    <input type="checkbox" id="toggleSwitch">
+                    <span class="slider"></span>
+                </label>
+        <span id="toggleLabelTr" style="font-size: 0.8rem;">tr</span>
+      </div>
+    </div>
+
+    <div id="flashcards"></div>
+
+    <div class="navigation">
+      <div class="nav-container">
+        <div class="nav-left">
+          <button id="prevBtn">&lt</button>
+        </div>
+        <div class="nav-counter" id="cardCounter">0 / 0</div>
+        <div class="nav-right">
+          <button id="nextBtn">&gt</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 1. db.json seç/ekle butonu (sadece ilk açılışta) -->
+    <div id="dbJsonSelectorContainer" style="display:none; width:100%; text-align:center; margin-top:40px;">
+      <button id="selectDbJsonBtn" style="padding:12px 24px; font-size:1.1rem; border-radius:8px; border:1px solid #ccc; background:#fff; cursor:pointer;">db.json seç / ekle</button>
+      <div id="dbJsonSelectorInfo" style="margin-top:10px; color:#888; font-size:0.9rem;"></div>
+    </div>
+
+    <!-- 2. Yeni kayıt ekleme modalı -->
+    <div id="addCardModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.4); z-index:2000; align-items:center; justify-content:center;">
+      <div style="background:#fff; padding:24px; border-radius:12px; min-width:320px; max-width:90vw; box-shadow:0 4px 24px rgba(0,0,0,0.2);">
+        <h3>Yeni Kart Ekle</h3>
+        <form id="addCardForm">
+          <div style="margin-bottom:8px;"><input name="bir" placeholder="bir (örn: substantiv)" required style="width:100%;padding:6px;"></div>
+          <div style="margin-bottom:8px;"><input name="bir_iki" placeholder="bir_iki (örn: #LF 1)" required style="width:100%;padding:6px;"></div>
+          <div style="margin-bottom:8px;"><input name="bir_uc_artikel" placeholder="bir_uc_artikel (örn: die)" style="width:100%;padding:6px;"></div>
+          <div style="margin-bottom:8px;"><input name="bir_uc" placeholder="bir_uc (örn: Gestaltung.)" required style="width:100%;padding:6px;"></div>
+          <div style="margin-bottom:8px;"><input name="bir_dort" placeholder="bir_dort" style="width:100%;padding:6px;"></div>
+          <div style="margin-bottom:8px;"><input name="iki" placeholder="iki (örn: isim)" required style="width:100%;padding:6px;"></div>
+          <div style="margin-bottom:8px;"><input name="iki_iki" placeholder="iki_iki (örn: biçimlendirme)" style="width:100%;padding:6px;"></div>
+          <div style="margin-bottom:8px;"><input name="iki_uc" placeholder="iki_uc (örn: Malzeme akışının tasarımı.)" style="width:100%;padding:6px;"></div>
+          <div style="text-align:right; margin-top:12px;">
+            <button type="button" id="cancelAddCardBtn" style="margin-right:10px;">İptal</button>
+            <button type="submit">Ekle</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+
+  </footer>
+
+  <script>
+    // ===== CONSTANTS & VARIABLES =====
+        const SCRIPT_URL = '<?!= scriptUrl ?>';
+        const LAST_SELECTED_SHEET_KEY = 'flashcards_lastSelectedSheet';
+
+        // DOM Elements
+        const cardsContainer = document.getElementById('flashcards');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const hamburgerIcon = document.getElementById('hamburgerIcon');
+        const menuContent = document.getElementById('menuContent');
+        const exportPdfBtn = document.getElementById('exportPdf');
+        const goToSheetBtn = document.getElementById('goToSheetBtn');
+        const cardCounter = document.getElementById('cardCounter');
+        const toggleSwitch = document.getElementById('toggleSwitch');
+        const sheetSelector = document.getElementById('sheetSelector');
+        const searchInput = document.getElementById('searchInput');
+
+
+
+
+        // Application State
+        let currentCardIndex = 0;
+        let flashcardsData = [];
+        let isFlippedToTr = false;
+        let isFlippedByToggle = false;
+        let sheetGids = {};
+        let searchTimeout = null;
+
+        // ===== yenileme =====
+        let lastKnownTimestamp = '';
+
+        // ===== UTILITY FUNCTIONS =====
+        const getCardDataCacheKey = () => `flashcardsData_${currentSheetName}`;
+        const getCardFlipStateKey = (index) => `cardFlipState_${currentSheetName}_${index}`;
+
+
+
+        // ===== DATA MANAGEMENT =====
+        // Eski Google Sheets ve Apps Script fonksiyonları tamamen kaldırıldı.
+        // Sadece db.json ile çalışan kodlar kullanılacak.
+
+        // document.addEventListener('DOMContentLoaded', loadSheetNamesAndInitialize); // KALDIRILDI
+
+        // checkForUpdates, handleRefresh, fetchData, initializeAppForSheet, handleSheetNamesSuccess, handleSheetNamesError gibi fonksiyonlar ve google.script.run ile ilgili tüm kodlar KALDIRILDI
+
+        // ===== CARD RENDERING & INTERACTION =====
+        function renderFlashcardsFromDb() {
+            cardsContainer.innerHTML = '';
+          if (!dbData[currentSheetName] || dbData[currentSheetName].length === 0) {
+                cardCounter.textContent = '0 / 0';
+                cardsContainer.innerHTML = `<p>Bu sayfada ('${currentSheetName || 'N/A'}') gösterilecek kart bulunamadı.</p>`;
+                prevBtn.disabled = true;
+                nextBtn.disabled = true;
+                exportPdfBtn.disabled = true;
+                return;
+            }
+            prevBtn.disabled = false;
+            nextBtn.disabled = false;
+            exportPdfBtn.disabled = false;
+          flashcardsData = dbData[currentSheetName];
+          currentCardIndex = Math.min(currentCardIndex, flashcardsData.length - 1);
+          if (currentCardIndex < 0 && flashcardsData.length > 0) currentCardIndex = 0;
+            flashcardsData.forEach((data, index) => {
+                const flashcard = document.createElement('div');
+                flashcard.className = 'flashcard';
+                flashcard.dataset.index = index;
+                flashcard.innerHTML = `
+                    <div class="card-inner">
+                        <div class="card-front">
+                            <div class="bir">${data.bir || ''}</div>
+                            <div class="bir_iki">${data.bir_iki || ''}</div>
+                          <div class="bottom-content-area"> 
+                            <div class="bir_uc_container">
+                                <div class="bir_uc_artikel">${data.bir_uc_artikel || ''}</div>
+                                <div class="bir_uc">${data.bir_uc || ''}</div>
+                            </div>
+                            <div class="bir_dort">${data.bir_dort || ''}</div>
+                          </div>
+                        </div>
+                        <div class="card-back">
+                            <div class="iki">${data.iki || ''}</div>
+                            <div class="content-back">
+                                <div class="iki_iki">${data.iki_iki || ''}</div>
+                                <div class="iki_uc">${data.iki_uc || ''}</div>
+                            </div>
+                        </div>
+                    </div>`;
+                flashcard.addEventListener('click', () => flipCard(flashcard));
+                cardsContainer.appendChild(flashcard);
+            });
+            if (flashcardsData.length > 0) {
+                showCard(currentCardIndex);
+            } else {
+                updateCounter(-1);
+            }
+        }
+
+        function showCard(index) {
+            document.querySelectorAll('.flashcard').forEach((card, i) => {
+                card.classList.toggle('active', i === index);
+            });
+            const activeCard = document.querySelector('.flashcard.active .card-inner');
+            if (activeCard) {
+            isFlippedToTr = toggleSwitch.checked;
+                activeCard.style.transform = isFlippedToTr ? 'rotateY(180deg)' : 'rotateY(0deg)';
+            }
+            updateCounter(index);
+        }
+
+        function flipCard(cardElement) {
+            const innerCard = cardElement.querySelector('.card-inner');
+            const isCurrentlyFlipped = innerCard.style.transform === 'rotateY(180deg)';
+            innerCard.style.transform = isCurrentlyFlipped ? 'rotateY(0deg)' : 'rotateY(180deg)';
+            isFlippedToTr = !isCurrentlyFlipped;
+            isFlippedByToggle = false;
+        }
+
+        function toggleAllCardsLanguage() {
+            isFlippedToTr = toggleSwitch.checked;
+            isFlippedByToggle = true;
+            const activeCardInner = document.querySelector('.flashcard.active .card-inner');
+            if (activeCardInner) {
+                activeCardInner.style.transform = isFlippedToTr ? 'rotateY(180deg)' : 'rotateY(0deg)';
+            }
+        }
+
+        function changeCard(direction) {
+            if (flashcardsData.length === 0) return;
+            currentCardIndex = (currentCardIndex + direction + flashcardsData.length) % flashcardsData.length;
+          isFlippedToTr = toggleSwitch.checked;
+          isFlippedByToggle = true;
+            showCard(currentCardIndex);
+        }
+
+        function updateCounter(index) {
+            if (flashcardsData.length === 0 || index < 0) {
+                cardCounter.textContent = `0 / 0`;
+            } else {
+                cardCounter.textContent = `${index + 1} / ${flashcardsData.length}`;
+            }
+        }
+
+        // ===== PRINT/PDF FUNCTIONALITY =====
+        async function exportToPrint() {
+            const printArea = document.getElementById('print-area');
+            const overlay = document.getElementById('print-overlay');
+            if (!printArea || !overlay) {
+                console.error('Gerekli HTML elementleri bulunamadı.');
+                alert('Yazdırma için gerekli HTML elementleri bulunamadı.');
+                return;
+            }
+            overlay.style.display = 'flex';
+            printArea.innerHTML = '';
+            const originalCardIndex = currentCardIndex;
+            try {
+                for (let i = 0; i < flashcardsData.length; i++) {
+                    overlay.innerHTML = `Kart ${i + 1} / ${flashcardsData.length} hazırlanıyor...<br><small>Lütfen bekleyin.</small>`;
+                    showCard(i);
+                    await new Promise(resolve => setTimeout(resolve, 150));
+                    const cardElement = document.querySelector(`.flashcard[data-index='${i}']`);
+                    if (!cardElement) {
+                        console.warn(`Dışa aktarma için kart [data-index='${i}'] bulunamadı.`);
+                        continue;
+                    }
+                    const frontElement = cardElement.querySelector('.card-front');
+                    const backElement = cardElement.querySelector('.card-back');
+                    if (!frontElement || !backElement) {
+                        console.warn(`Kart [data-index='${i}'] için ön veya arka yüz bulunamadı.`);
+                        continue;
+                    }
+                    const frontCanvas = await html2canvas(frontElement, { scale: 3, useCORS: true, logging: false });
+                    const frontImage = document.createElement('img');
+                    frontImage.className = 'print-image';
+                    frontImage.src = frontCanvas.toDataURL('image/png', 1.0);
+                    const backCanvas = await html2canvas(backElement, { scale: 3, useCORS: true, logging: false });
+                    const backImage = document.createElement('img');
+                    backImage.className = 'print-image mirror-x';
+                    backImage.src = backCanvas.toDataURL('image/png', 1.0);
+                    printArea.appendChild(frontImage);
+                    printArea.appendChild(backImage);
+                }
+                if (printArea.children.length === 0) {
+                    throw new Error(flashcardsData.length > 0 ? 
+                        "Kart resimleri oluşturulamadı, yazdırma alanı boş." : 
+                        "Yazdırılacak kart bulunmuyor.");
+                }
+                overlay.innerHTML = "Yazdırma penceresi açılıyor...";
+                await new Promise(res => setTimeout(res, 500));
+                window.print();
+            } catch (error) {
+                console.error("Yazdırma hazırlığı sırasında kritik hata:", error);
+                alert("Baskı hazırlanırken bir hata oluştu. Lütfen konsolu kontrol edin. Hata: " + error.message);
+            } finally {
+                overlay.style.display = 'none';
+                if (flashcardsData.length > 0) {
+                    showCard(originalCardIndex);
+                } else {
+                    updateCounter(-1);
+                }
+            }
+        }
+
+        function goToGoogleSheets() {
+            const selectedSheetName = sheetSelector.value;
+            const selectedSheetGid = sheetGids[selectedSheetName];
+
+            if (!selectedSheetName) {
+                alert("Lütfen önce bir sayfa seçin.");
+                return;
+            }
+
+            if (typeof selectedSheetGid === 'undefined') {
+                alert(`Seçili sayfa "${selectedSheetName}" için GID bulunamadı. Lütfen sayfayı yenileyin.`);
+                console.error("GID bulunamadı:", selectedSheetName, sheetGids);
+                return;
+            }
+
+          // google.script.run
+          //     .withSuccessHandler(handleSheetUrlSuccess)
+          //     .withFailureHandler(handleSheetUrlError)
+          //     .getSpreadsheetPageUrlGs(selectedSheetGid);
+        }
+
+        function handleSheetUrlSuccess(response) {
+            if (response.success && response.url) {
+                window.open(response.url, '_blank');
+            } else {
+                alert("Google Sheets URL'i alınamadı." + (response.error ? " Hata: " + response.error : ""));
+            }
+        }
+
+        function handleSheetUrlError(error) {
+            console.error('Google Sheets URL\'i alınamadı:', error);
+            alert("Google Sheets URL'i alınamadı. Lütfen sayfayı yenileyin.");
+        }
+
+        // ===== EVENT LISTENERS =====
+        sheetSelector.addEventListener('change', function() {
+            currentSheetName = this.value;
+            localStorage.setItem('lastSelectedSheet', currentSheetName);
+            renderFlashcardsFromDb();
+            menuContent.classList.remove('show');
+            hamburgerIcon.classList.remove('active');
+        });
+
+        prevBtn.addEventListener('click', () => changeCard(-1));
+        nextBtn.addEventListener('click', () => changeCard(1));
+        toggleSwitch.addEventListener('change', toggleAllCardsLanguage);
+
+        hamburgerIcon.addEventListener('click', () => {
+            menuContent.classList.toggle('show');
+            hamburgerIcon.classList.toggle('active');
+        });
+
+        exportPdfBtn.addEventListener('click', async () => {
+            if (flashcardsData.length === 0) {
+                alert("Dışa aktarılacak kart bulunmamaktadır.");
+                menuContent.classList.remove('show');
+                hamburgerIcon.classList.remove('active');
+                return;
+            }
+            const originalText = exportPdfBtn.textContent;
+            exportPdfBtn.textContent = 'Hazırlanıyor...';
+            exportPdfBtn.disabled = true;
+
+            try {
+                await exportToPrint();
+            } catch (error) {
+                console.error("exportPdfBtn tıklama hatası:", error);
+                alert("PDF oluşturulurken bir hata oluştu. Konsolu kontrol edin.");
+            } finally {
+                exportPdfBtn.textContent = originalText;
+                if (flashcardsData.length > 0) {
+                    exportPdfBtn.disabled = false;
+                }
+                menuContent.classList.remove('show');
+                hamburgerIcon.classList.remove('active');
+            }
+        });
+
+        goToSheetBtn.addEventListener('click', () => {
+          showAddCardModal();
+            menuContent.classList.remove('show');
+            hamburgerIcon.classList.remove('active');
+        });
+
+        document.addEventListener('click', (event) => {
+            if (!menuContent.contains(event.target) && !hamburgerIcon.contains(event.target)) {
+                menuContent.classList.remove('show');
+                hamburgerIcon.classList.remove('active');
+            }
+        });
+
+        // ===== SEARCH FUNCTIONALITY =====
+        function searchCards(query) {
+            if (!query.trim()) {
+                // Arama sorgusu boşsa, mevcut kartı göster
+            renderFlashcardsFromDb();
+                showCard(currentCardIndex);
+                return;
+            }
+
+            query = query.toLowerCase();
+            const foundIndex = flashcardsData.findIndex(card => 
+                card.bir_uc.toLowerCase().includes(query)
+            );
+
+            if (foundIndex !== -1) {
+                currentCardIndex = foundIndex;
+                showCard(currentCardIndex);
+            } else {
+                // Eşleşme bulunamadı mesajı göster
+                cardsContainer.innerHTML = `<p>Arama sonucu bulunamadı: "${query}"</p>`;
+                cardCounter.textContent = '0 / 0';
+            }
+        }
+
+        // Arama input event listener
+        searchInput.addEventListener('input', (e) => {
+            // Önceki timeout'u temizle
+            if (searchTimeout) {
+                clearTimeout(searchTimeout);
+            }
+
+            // Yeni bir timeout başlat (300ms debounce)
+            searchTimeout = setTimeout(() => {
+                searchCards(e.target.value);
+            }, 300);
+        });
+
+        // Enter tuşuna basıldığında aramayı tetikle
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                searchCards(e.target.value);
+            }
+        });
+
+        // Arama çubuğuna tıklandığında içeriği temizle ve mevcut kartı göster
+        searchInput.addEventListener('click', (e) => {
+            e.target.value = '';
+          renderFlashcardsFromDb();
+            showCard(currentCardIndex);
+        });
+
+
+
+        
+
+        // Initialize the application
+        // document.addEventListener('DOMContentLoaded', loadSheetNamesAndInitialize);
+
+
+       function checkForUpdates() {
+    // google.script.run.withSuccessHandler(serverTimestamp => {
+    //     if (serverTimestamp && serverTimestamp !== lastKnownTimestamp) {
+    //         lastKnownTimestamp = serverTimestamp;
+    //         if (currentSheetName) {
+    //             localStorage.removeItem(getCardDataCacheKey());
+    //             flashcardsData = [];
+    //             currentCardIndex = 0;
+    //             cardsContainer.innerHTML = `<p>Yeni veriler alınıyor (${currentSheetName})...</p>`;
+    //             cardCounter.textContent = '0 / 0';
+    //             fetchData();
+    //         }
+    //     }
+    // }).getLastUpdateTimestamp();
+}
+
+
+
+function handleRefresh() {
+    document.getElementById('updateAlert').style.display = 'none';
+
+    // Yeni zaman damgasını güncelle
+    // google.script.run.withSuccessHandler(ts => {
+    //     lastKnownTimestamp = ts || '';
+    // }).getLastUpdateTimestamp();
+
+    if (currentSheetName) {
+        // localStorage.removeItem(getCardDataCacheKey());
+        flashcardsData = [];
+        currentCardIndex = 0;
+        cardsContainer.innerHTML = `<p>Veriler yenileniyor (${currentSheetName})...</p>`;
+        cardCounter.textContent = '0 / 0';
+        // fetchData();
+    }
+}
+
+
+// Sayfa açıldıktan sonra periyodik kontrol başlat
+// document.addEventListener('DOMContentLoaded', () => {
+//     google.script.run.withSuccessHandler(ts => {
+//         lastKnownTimestamp = ts || '';
+//     }).getLastUpdateTimestamp();
+
+//     setInterval(checkForUpdates, 10000); // 10 saniyede bir kontrol
+// });
+
+// 1. File System Access API ile db.json seçme/oluşturma
+let dbFileHandle = null;
+let dbData = {};
+let dbFileName = 'db.json';
+let currentSheetName = '';
+
+const dbJsonSelectorContainer = document.getElementById('dbJsonSelectorContainer');
+const selectDbJsonBtn = document.getElementById('selectDbJsonBtn');
+const dbJsonSelectorInfo = document.getElementById('dbJsonSelectorInfo');
+const addCardModal = document.getElementById('addCardModal');
+const addCardForm = document.getElementById('addCardForm');
+const cancelAddCardBtn = document.getElementById('cancelAddCardBtn');
+
+// File System Access API destek kontrolü
+const supportsFS = 'showOpenFilePicker' in window && 'showSaveFilePicker' in window;
+
+function showDbJsonSelector(message = '') {
+  dbJsonSelectorContainer.style.display = 'block';
+  dbJsonSelectorInfo.textContent = message || 'Lütfen bir db.json dosyası seçin veya oluşturun.';
+}
+
+function hideDbJsonSelector() {
+  dbJsonSelectorContainer.style.display = 'none';
+}
+
+// Son kullanılan dosya adını localStorage'da saklamak için anahtar
+const LAST_DB_FILE_KEY = 'lastDbJsonFileName';
+
+// Uygulama başlatıcı
+async function startApp() {
+  if (!supportsFS) {
+    showDbJsonSelector('Tarayıcınızda yerel dosya erişimi desteklenmiyor.');
+    return;
+  }
+  showDbJsonSelector();
+  // Eğer son db.json varsa modalı göster
+  if (localStorage.getItem(LAST_DB_FILE_KEY)) {
+    showLastDbModal();
+  }
+}
+
+selectDbJsonBtn.addEventListener('click', selectOrCreateDbJson);
+
+// Menü ve sayfa başlıklarını db.json'dan oluştur
+function renderSheetNamesAndMenu(selectedSheet) {
+  sheetSelector.innerHTML = '';
+  sheetSelector.disabled = false;
+  const sheetNames = Object.keys(dbData || {});
+  if (sheetNames.length === 0) {
+    sheetSelector.innerHTML = '<option>Sayfa yok</option>';
+    currentSheetName = '';
+    return;
+  }
+  sheetNames.forEach(sheetName => {
+    const option = document.createElement('option');
+    option.value = sheetName;
+    option.textContent = sheetName;
+    sheetSelector.appendChild(option);
+  });
+  // Öncelik: localStorage > parametre > ilk sayfa
+  const lastSelected = localStorage.getItem('lastSelectedSheet');
+  if (lastSelected && sheetNames.includes(lastSelected)) {
+    sheetSelector.value = lastSelected;
+    currentSheetName = lastSelected;
+  } else if (selectedSheet && sheetNames.includes(selectedSheet)) {
+    sheetSelector.value = selectedSheet;
+    currentSheetName = selectedSheet;
+  } else {
+    sheetSelector.value = sheetNames[0];
+    currentSheetName = sheetNames[0];
+  }
+}
+
+// Kartları seçili sayfadan oku ve göster
+function renderFlashcardsFromDb() {
+  cardsContainer.innerHTML = '';
+  if (!dbData[currentSheetName] || dbData[currentSheetName].length === 0) {
+    cardCounter.textContent = '0 / 0';
+    cardsContainer.innerHTML = `<p>Bu sayfada ('${currentSheetName || 'N/A'}') gösterilecek kart bulunamadı.</p>`;
+    prevBtn.disabled = true;
+    nextBtn.disabled = true;
+    exportPdfBtn.disabled = true;
+    return;
+  }
+  prevBtn.disabled = false;
+  nextBtn.disabled = false;
+  exportPdfBtn.disabled = false;
+  flashcardsData = dbData[currentSheetName];
+  currentCardIndex = Math.min(currentCardIndex, flashcardsData.length - 1);
+  if (currentCardIndex < 0 && flashcardsData.length > 0) currentCardIndex = 0;
+  flashcardsData.forEach((data, index) => {
+    const flashcard = document.createElement('div');
+    flashcard.className = 'flashcard';
+    flashcard.dataset.index = index;
+    flashcard.innerHTML = `
+      <div class="card-inner">
+        <div class="card-front">
+          <div class="bir">${data.bir || ''}</div>
+          <div class="bir_iki">${data.bir_iki || ''}</div>
+          <div class="bottom-content-area">
+            <div class="bir_uc_container">
+              <div class="bir_uc_artikel">${data.bir_uc_artikel || ''}</div>
+              <div class="bir_uc">${data.bir_uc || ''}</div>
+            </div>
+            <div class="bir_dort">${data.bir_dort || ''}</div>
+          </div>
+        </div>
+        <div class="card-back">
+          <div class="iki">${data.iki || ''}</div>
+          <div class="content-back">
+            <div class="iki_iki">${data.iki_iki || ''}</div>
+            <div class="iki_uc">${data.iki_uc || ''}</div>
+          </div>
+        </div>
+      </div>`;
+    flashcard.addEventListener('click', () => flipCard(flashcard));
+    cardsContainer.appendChild(flashcard);
+  });
+  if (flashcardsData.length > 0) {
+    showCard(currentCardIndex);
+  } else {
+    updateCounter(-1);
+  }
+}
+
+// Ekle butonu ile yeni kart ekleme
+function showAddCardModal() {
+  addCardModal.style.display = 'flex';
+  addCardForm.reset();
+}
+function hideAddCardModal() {
+  addCardModal.style.display = 'none';
+}
+goToSheetBtn.removeEventListener('click', goToGoogleSheets);
+goToSheetBtn.addEventListener('click', () => {
+  showAddCardModal();
+  menuContent.classList.remove('show');
+  hamburgerIcon.classList.remove('active');
+});
+cancelAddCardBtn.addEventListener('click', hideAddCardModal);
+addCardForm.addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const formData = new FormData(addCardForm);
+  const newCard = {};
+  for (const [key, value] of formData.entries()) {
+    newCard[key] = value;
+  }
+  if (!dbData[currentSheetName]) dbData[currentSheetName] = [];
+  dbData[currentSheetName].push(newCard);
+  await saveDbJson();
+  hideAddCardModal();
+  renderSheetNamesAndMenu(currentSheetName);
+  // Yeni eklenen kartı hemen göstermek için currentCardIndex'i son karta ayarla
+  currentCardIndex = dbData[currentSheetName].length - 1;
+  renderFlashcardsFromDb();
+});
+
+// Uygulama başlat
+window.addEventListener('DOMContentLoaded', startApp);
+
+// db.json yüklendikten sonra uygulamayı başlat
+function initializeAppForDb() {
+  renderSheetNamesAndMenu(currentSheetName);
+  renderFlashcardsFromDb();
+}
+
+// Tam ekran modal için HTML ekle
+const lastDbModal = document.createElement('div');
+lastDbModal.id = 'lastDbModal';
+lastDbModal.style = `
+  display: none;
+  position: fixed;
+  top: 0; left: 0; width: 100vw; height: 100vh;
+  background: rgba(0,0,0,0.65);
+  z-index: 3000;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+`;
+lastDbModal.innerHTML = `
+  <div style="background: #fff; padding: 36px 32px 32px 32px; border-radius: 18px; min-width: 320px; max-width: 90vw; box-shadow: 0 8px 32px rgba(0,0,0,0.25); display: flex; flex-direction: column; align-items: center;">
+    <div id="lastDbModalFileName" style="font-size: 1.15rem; color: #222; margin-bottom: 18px; text-align:center;"></div>
+    <div style="font-size: 1rem; color: #666; margin-bottom: 24px; text-align:center;">Güvenlik nedeniyle dosya tekrar seçilmeli.</div>
+    <button id="lastDbModalReselectBtn" style="font-size: 1.25rem; padding: 18px 40px; border-radius: 12px; border: none; background: #222; color: #fff; cursor: pointer; font-weight: 700; margin-bottom: 8px; width: 100%; max-width: 320px;">db.json dosyasını seç</button>
+  </div>
+`;
+document.body.appendChild(lastDbModal);
+const lastDbModalFileName = document.getElementById('lastDbModalFileName');
+const lastDbModalReselectBtn = document.getElementById('lastDbModalReselectBtn');
+
+// Modalı göster
+function showLastDbModal() {
+  const lastDbName = localStorage.getItem(LAST_DB_FILE_KEY);
+  if (lastDbName) {
+    lastDbModalFileName.textContent = `Son kullanılan dosya: ${lastDbName}`;
+    lastDbModal.style.display = 'flex';
+  }
+}
+// Modalı gizle
+function hideLastDbModal() {
+  lastDbModal.style.display = 'none';
+}
+// Buton tıklanınca dosya seçtir ve modalı kapat
+lastDbModalReselectBtn.onclick = async function() {
+  await selectOrCreateDbJson();
+  hideLastDbModal();
+};
+
+async function selectOrCreateDbJson() {
+  try {
+    let fileHandle;
+    if (supportsFS) {
+      [fileHandle] = await window.showOpenFilePicker({
+        types: [{ description: 'JSON', accept: { 'application/json': ['.json'] } }],
+        excludeAcceptAllOption: false,
+        multiple: false
+      });
+    } else {
+      alert('Tarayıcınızda yerel dosya erişimi desteklenmiyor. Chrome veya Edge kullanın.');
+      return;
+    }
+    dbFileHandle = fileHandle;
+    // Dosya adını kaydet
+    localStorage.setItem(LAST_DB_FILE_KEY, dbFileHandle.name || dbFileName);
+    await loadDbJson();
+    hideDbJsonSelector();
+    initializeAppForDb();
+  } catch (e) {
+    showDbJsonSelector('Dosya seçilmedi.');
+  }
+}
+
+async function loadDbJson() {
+  if (!dbFileHandle) return;
+  const file = await dbFileHandle.getFile();
+  const text = await file.text();
+  try {
+    dbData = JSON.parse(text);
+  } catch (e) {
+    dbData = {};
+    alert('db.json okunamadı veya bozuk.');
+  }
+}
+
+async function saveDbJson() {
+  if (!dbFileHandle) return;
+  const writable = await dbFileHandle.createWritable();
+  await writable.write(JSON.stringify(dbData, null, 2));
+  await writable.close();
+}
+
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('service-worker.js');
+  });
+}
+  </script>
+</body>
+
+</html>
