@@ -1459,15 +1459,6 @@
       "iki": "isim",
       "iki_iki": "çevre,</br>\nortam.",
       "iki_uc": "Bu şehrin çevresi çok yeşil."
-    },
-    {
-      "bir": "substantiv",
-      "bir_iki": "#LF6",
-      "bir_uc": "we",
-      "bir_dort": "ew",
-      "iki": "isim",
-      "iki_iki": "ew",
-      "iki_uc": "ew"
     }
   ],
   "LF7": [
@@ -1480,15 +1471,6 @@
       "iki": "isim",
       "iki_iki": "çevre,</br>\nortam.",
       "iki_uc": "Bu şehrin çevresi çok yeşil."
-    },
-    {
-      "bir": "verb",
-      "bir_iki": "#LF7",
-      "bir_uc": "sas",
-      "bir_dort": "sas",
-      "iki": "fiil",
-      "iki_iki": "sas",
-      "iki_uc": "sas"
     }
   ],
   "LF8": [
