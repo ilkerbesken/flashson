@@ -145,6 +145,34 @@ GitHub Pages'te yayınlamak için:
    https://kullaniciadi.github.io/flashson/
    ```
 
+### ⚠️ GitHub Pages Kısıtlamaları
+
+**File System Access API** GitHub Pages'te çalışmayabilir. Bu durumda:
+
+- **Yerel geliştirme** için Live Server kullanın
+- **Production** için Netlify, Vercel gibi modern hosting servisleri önerilir
+- **Demo amaçlı** kullanım için alternatif çözümler geliştirilebilir
+
+### 🚀 Alternatif Hosting
+
+#### Netlify ile Deploy
+```bash
+# Netlify CLI kurulumu
+npm install -g netlify-cli
+
+# Deploy
+netlify deploy --dir=public --prod
+```
+
+#### Vercel ile Deploy
+```bash
+# Vercel CLI kurulumu
+npm install -g vercel
+
+# Deploy
+vercel --prod
+```
+
 ## 📋 db.json Formatı
 
 ```json
