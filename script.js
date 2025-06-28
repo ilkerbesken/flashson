@@ -1,4 +1,3 @@
-
     // ===== CONSTANTS & VARIABLES =====
         const SCRIPT_URL = '<?!= scriptUrl ?>';
         const LAST_SELECTED_SHEET_KEY = 'flashcards_lastSelectedSheet';
@@ -11,6 +10,7 @@
         const menuContent = document.getElementById('menuContent');
         const exportPdfBtn = document.getElementById('exportPdf');
         const goToSheetBtn = document.getElementById('goToSheetBtn');
+        const addDeckBtn = document.getElementById('addDeckBtn');
         const cardCounter = document.getElementById('cardCounter');
         const toggleSwitch = document.getElementById('toggleSwitch');
         const sheetSelector = document.getElementById('sheetSelector');
@@ -285,6 +285,12 @@
             hamburgerIcon.classList.remove('active');
         });
 
+        addDeckBtn.addEventListener('click', () => {
+          showAddDeckModal();
+            menuContent.classList.remove('show');
+            hamburgerIcon.classList.remove('active');
+        });
+
         document.addEventListener('click', (event) => {
             if (!menuContent.contains(event.target) && !hamburgerIcon.contains(event.target)) {
                 menuContent.classList.remove('show');
@@ -409,6 +415,10 @@ const dbJsonSelectorInfo = document.getElementById('dbJsonSelectorInfo');
 const addCardModal = document.getElementById('addCardModal');
 const addCardForm = document.getElementById('addCardForm');
 const cancelAddCardBtn = document.getElementById('cancelAddCardBtn');
+const addDeckModal = document.getElementById('addDeckModal');
+const addDeckForm = document.getElementById('addDeckForm');
+const cancelAddDeckBtn = document.getElementById('cancelAddDeckBtn');
+const deckError = document.getElementById('deckError');
 
 // File System Access API destek kontrolü
 const supportsFS = 'showOpenFilePicker' in window && 'showSaveFilePicker' in window;
@@ -573,9 +583,22 @@ function showAddCardModal() {
     birIkiInput.value = `#${currentSheetName}`;
   }
 }
+
 function hideAddCardModal() {
   addCardModal.style.display = 'none';
 }
+
+// Deste ekle butonu ile yeni deste ekleme
+function showAddDeckModal() {
+  addDeckModal.style.display = 'flex';
+  addDeckForm.reset();
+  deckError.style.display = 'none';
+}
+
+function hideAddDeckModal() {
+  addDeckModal.style.display = 'none';
+}
+
 goToSheetBtn.removeEventListener('click', goToGoogleSheets);
 goToSheetBtn.addEventListener('click', () => {
   showAddCardModal();
@@ -590,14 +613,65 @@ addCardForm.addEventListener('submit', async function(e) {
   for (const [key, value] of formData.entries()) {
     newCard[key] = value;
   }
-  if (!dbData[currentSheetName]) dbData[currentSheetName] = [];
-  dbData[currentSheetName].push(newCard);
+  
+  // bir_iki input alanından sayfa adını al (# işaretini kaldır)
+  const pageName = newCard.bir_iki ? newCard.bir_iki.replace('#', '') : currentSheetName;
+  
+  // Eğer sayfa JSON'da mevcut değilse, yeni sayfa oluştur
+  if (!dbData[pageName]) {
+    dbData[pageName] = [];
+  }
+  
+  // Kartı ilgili sayfaya ekle
+  dbData[pageName].push(newCard);
   await saveDbJson();
   hideAddCardModal();
+  
+  // Eğer yeni sayfa oluşturulduysa, o sayfaya geç
+  if (pageName !== currentSheetName) {
+    currentSheetName = pageName;
+  }
+  
   renderSheetNamesAndMenu(currentSheetName);
+  renderFlashcardsFromDb();
   // Yeni eklenen kartı hemen göstermek için currentCardIndex'i son karta ayarla
   currentCardIndex = dbData[currentSheetName].length - 1;
   renderFlashcardsFromDb();
+  // Welcome modalı asla görünmesin
+  if (typeof welcomeModal !== 'undefined') welcomeModal.style.display = 'none';
+});
+
+// Deste ekleme form event listener'ları
+cancelAddDeckBtn.addEventListener('click', hideAddDeckModal);
+addDeckForm.addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const formData = new FormData(addDeckForm);
+  const deckName = formData.get('deckName').trim();
+  
+  // Boş isim kontrolü
+  if (!deckName) {
+    deckError.textContent = 'Deste adı boş olamaz.';
+    deckError.style.display = 'block';
+    return;
+  }
+  
+  // Mevcut deste kontrolü
+  if (dbData[deckName]) {
+    deckError.textContent = 'Bu deste zaten mevcut.';
+    deckError.style.display = 'block';
+    return;
+  }
+  
+  // Yeni deste oluştur
+  dbData[deckName] = [];
+  await saveDbJson();
+  hideAddDeckModal();
+  
+  // Yeni desteye geç
+  currentSheetName = deckName;
+  renderSheetNamesAndMenu(currentSheetName);
+  renderFlashcardsFromDb();
+  
   // Welcome modalı asla görünmesin
   if (typeof welcomeModal !== 'undefined') welcomeModal.style.display = 'none';
 });

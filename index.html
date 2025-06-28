@@ -37,9 +37,10 @@
         </div>
         <div class="menu-bottom-actions">
           <button1 id="exportPdf"><span class="material-icons" style="vertical-align:middle;margin-right:8px;font-size:1.2em;">picture_as_pdf</span>PDF Dışa Aktar</button1>
-          <button1 id="goToSheetBtn"><span class="material-icons" style="vertical-align:middle;margin-right:8px;font-size:1.2em;">add</span>Ekle</button1>
+          <button1 id="goToSheetBtn"><span class="material-icons" style="vertical-align:middle;margin-right:8px;font-size:1.2em;">add_box</span>Kart Ekle</button1>
+          <button1 id="addDeckBtn"><span class="material-icons" style="vertical-align:middle;margin-right:8px;font-size:1.2em;">collections_bookmark</span>Deste Ekle</button1>
         </div>
-        <button1 id="installPwaBtn" style="display:none;"><span class="material-icons" style="vertical-align:middle;margin-right:8px;font-size:1.2em;">desktop_windows</span>Masaüstüne Ekle</button1>
+        <button1 id="installPwaBtn"><span class="material-icons" style="vertical-align:middle;margin-right:8px;font-size:1.2em;">browser_updated</span>Masaüstüne Ekle</button1>
       </div>
     </div>
 
@@ -136,15 +137,29 @@
         </form>
       </div>
     </div>
+
+    <!-- 3. Yeni deste ekleme modalı -->
+    <div id="addDeckModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.4); z-index:2000; align-items:center; justify-content:center;">
+      <div style="background:#fff; padding:24px; border-radius:12px; min-width:320px; max-width:90vw; box-shadow:0 4px 24px rgba(0,0,0,0.2);">
+        <h3 style="text-align:center;">Yeni Deste Ekle</h3>
+        <form id="addDeckForm">
+          <div style="margin-bottom:16px;">
+            <input name="deckName" placeholder="Deste adını girin" required style="width:100%;padding:12px;font-size:1.1rem;border:1px solid #ccc;border-radius:6px;">
+          </div>
+          <div id="deckError" style="color:#cc5353;font-size:0.9rem;margin-bottom:16px;display:none;"></div>
+          <div style="display:flex; justify-content:center; align-items:center; gap:16px; margin-top:16px;">
+            <button type="button" id="cancelAddDeckBtn" style="padding:12px 32px; font-size:1.1rem; border-radius:8px; border:1px solid #ccc; background:#eee; cursor:pointer; font-weight:600; min-width:100px; text-align:center;">İptal</button>
+            <button type="submit" style="padding:12px 32px; font-size:1.1rem; border-radius:8px; border:1px solid #222; background:#222; color:#fff; cursor:pointer; font-weight:700; min-width:100px; text-align:center;">Ekle</button>
+          </div>
+        </form>
+      </div>
+    </div>
   </main>
 
   <script src="script.js"></script>
 
   <footer>
-
   </footer>
 
-  
 </body>
-
 </html>
